@@ -37,9 +37,6 @@ int main(int argc, char **argv)
    action = tool_bar->addAction("&Show method 1", scene1, SLOT(show_method_1()));
    action->setShortcut(QString("1"));
 
-   action = tool_bar->addAction("&Show method 2", scene1, SLOT(show_method_2()));
-   action->setShortcut(QString("2"));
-
    action = tool_bar->addAction("&Show error graph", scene1, SLOT(show_err()));
    action->setShortcut(QString("3"));
 

@@ -58,11 +58,9 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
    a_y = DEFAULT_A;
    b_y = DEFAULT_B;
    n = 100;
-   n_appr_x = 20;
-   n_appr_y = 20;
-   working_with_file = 0;
+   n_appr_x = 25;
+   n_appr_y = 25;
    show_graph_1 = 1;
-   show_graph_2 = 0;
    show_graph_err = 0;
    scale_parameter = 1;
    disturb = 0;
@@ -70,7 +68,6 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
    max_buf_1 = 0;
    max_buf_2 = 0;
    initialized = 0;
-   initialized_2 = 0;
    func_id = 6;
 
    change_func();
@@ -85,16 +82,6 @@ Scene3D::Scene3D(QWidget *parent) : QGLWidget(parent)
    }
    derivatives = (double *)malloc(2 * (n_appr_x + n_appr_y) * sizeof(double));
    values = (double *)malloc(n_appr_x * n_appr_y * sizeof(double));
-   state_2 = (double **)malloc(n_appr_x * n_appr_y * sizeof(double));
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         state_2[i * n_appr_y + j] = (double *)malloc(16 * sizeof(double));
-      }
-   }
-   derivatives_2 = (double *)malloc(2 * (n_appr_x + n_appr_y) * sizeof(double));
-   values_2 = (double *)malloc(n_appr_x * n_appr_y * sizeof(double));
 }
 
 Scene3D::~Scene3D()
@@ -110,17 +97,6 @@ Scene3D::~Scene3D()
       }
    }
    free(state);
-   free(values_2);
-   free(derivatives_2);
-
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         free(state_2[i * n_appr_y + j]);
-      }
-   }
-   free(state_2);
 }
 
 int Scene3D::Pf1_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y, double b_y)
@@ -187,59 +163,6 @@ double Scene3D::Pf1(double x, double y, int n_appr_x, int n_appr_y)
    return method_compute(n_appr_x, a_x, b_x, x, n_appr_y, a_y, b_y, y, state);
 }
 
-int Scene3D::Pf2_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y, double b_y)
-{
-
-   double h_x = (b_x - a_x) / (n_appr_x - 1);
-   double h_y = (b_y - a_y) / (n_appr_y - 1);
-   state_2 = (double **)malloc(n_appr_x * n_appr_y * sizeof(double *));
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         state_2[i * n_appr_y + j] = (double *)malloc(16 * sizeof(double));
-      }
-   }
-   values_2 = (double *)realloc(values_2, n_appr_x * n_appr_y * sizeof(double));
-   derivatives_2 = (double *)realloc(derivatives_2, 2 * (n_appr_x + n_appr_y) * sizeof(double));
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         values_2[i * n_appr_y + j] = 0;
-      }
-   }
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         for (int k = 0; k < 16; k++)
-         {
-            state_2[i * n_appr_y + j][k] = 0;
-         }
-      }
-   }
-   for (int i = 0; i < 2 * (n_appr_x + n_appr_y); i++)
-   {
-      derivatives_2[i] = 0;
-   }
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         values_2[i * n_appr_y + j] = f(a_x + i * h_x, a_y + j * h_y);
-      }
-   }
-
-   method2_init(n_appr_x, a_x, b_x, n_appr_y, a_y, b_y, values_2, derivatives_2, state_2);
-   return 0;
-}
-
-double Scene3D::Pf2(double x, double y, int n_appr_x, int n_appr_y)
-{
-   return method_compute(n_appr_x, a_x, b_x, x, n_appr_y, a_y, b_y, y, state_2);
-}
-
 double Scene3D::f(double x, double y)
 {
 
@@ -247,42 +170,42 @@ double Scene3D::f(double x, double y)
    {
    case 0:
       f_name = "k = 0   f (x, y) = 1";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_0(x, y) + disturb * 0.1 * max_buf;
       return (f_0(x, y));
    case 1:
       f_name = "k = 1   f (x, y) = x";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_1(x, y) + disturb * 0.1 * max_buf;
       return (f_1(x, y));
    case 2:
       f_name = "k = 2   f (x, y) = y";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_2(x, y) + disturb * 0.1 * max_buf;
       return (f_2(x, y));
    case 3:
       f_name = "k = 3   f (x, y) = x + y";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_3(x, y) + disturb * 0.1 * max_buf;
       return (f_3(x, y));
    case 4:
       f_name = "k = 4   f (x, y) = sqrt(x * x + y * y)";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_4(x, y) + disturb * 0.1 * max_buf;
       return (f_4(x, y));
    case 5:
       f_name = "k = 5   f (x, y) = x * x + y * y";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_5(x, y) + disturb * 0.1 * max_buf;
       return (f_5(x, y));
    case 6:
       f_name = "k = 6   f (x, y) = exp(x * x - y * y)";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_6(x, y) + disturb * 0.1 * max_buf;
       return (f_6(x, y));
    case 7:
       f_name = "k = 7   f (x, y) = 1 / (25 * (x * x + y * y) + 1)";
-      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (2 * n) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (2 * n))
+      if (fabs(x - a_x - ((b_x - a_x) / (n_appr_x - 1)) * (n_appr_x / 2)) < (b_x - a_x) / (10 * n_appr_x) && fabs(y - a_y - ((b_y - a_y) / (n_appr_y - 1)) * (n_appr_y / 2)) < (b_y - a_y) / (10 * n_appr_y))
          return f_7(x, y) + disturb * 0.1 * max_buf;
       return (f_7(x, y));
    default:
@@ -333,7 +256,6 @@ void Scene3D::change_func()
       break;
    }
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -344,15 +266,12 @@ void Scene3D::add_n_appr()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    n_appr_x += 10;
    n_appr_y += 10;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -363,14 +282,11 @@ void Scene3D::add_n_appr_x()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    n_appr_x += 10;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -381,14 +297,11 @@ void Scene3D::add_n_appr_y()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    n_appr_y += 10;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -399,11 +312,9 @@ void Scene3D::reduce_n_appr()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    if (n_appr_x - 10 > 9)
    {
       n_appr_x -= 10;
@@ -413,7 +324,6 @@ void Scene3D::reduce_n_appr()
       n_appr_y -= 10;
    }
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -424,17 +334,14 @@ void Scene3D::reduce_n_appr_x()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    if (n_appr_x - 10 > 9)
    {
       n_appr_x -= 10;
    }
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -445,17 +352,14 @@ void Scene3D::reduce_n_appr_y()
       for (int j = 0; j < n_appr_y; j++)
       {
          free(state[i * n_appr_y + j]);
-         free(state_2[i * n_appr_y + j]);
       }
    }
    free(state);
-   free(state_2);
    if (n_appr_y - 10 > 9)
    {
       n_appr_y -= 10;
    }
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -481,7 +385,6 @@ void Scene3D::add_disturb()
 {
    disturb += 1;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -489,7 +392,6 @@ void Scene3D::sub_disturb()
 {
    disturb -= 1;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 
@@ -499,19 +401,12 @@ void Scene3D::show_method_1()
    initialized = 0;
    updateGL();
 }
-void Scene3D::show_method_2()
-{
-   show_graph_2 = (show_graph_2 + 1) % 2;
-   initialized_2 = 0;
-   updateGL();
-}
+
 void Scene3D::show_err()
 {
    show_graph_err = (show_graph_err + 1) % 2;
    show_graph_1 = 0;
-   show_graph_2 = 0;
    initialized = 0;
-   initialized_2 = 0;
    updateGL();
 }
 void Scene3D::scale_up()
@@ -543,9 +438,7 @@ void Scene3D::initializeGL()
    n = 50;
    n_appr_x = 25;
    n_appr_y = 25;
-   working_with_file = 0;
    show_graph_1 = 0;
-   show_graph_2 = 0;
    show_graph_err = 0;
    scale_parameter = 1;
    disturb = 0;
@@ -553,7 +446,6 @@ void Scene3D::initializeGL()
    max_buf_1 = 0;
    max_buf_2 = 0;
    initialized = 0;
-   initialized_2 = 0;
    func_id = 0;
 
    state = (double **)malloc(n_appr_x * n_appr_y * sizeof(double));
@@ -566,16 +458,6 @@ void Scene3D::initializeGL()
    }
    derivatives = (double *)malloc(2 * (n_appr_x + n_appr_y) * sizeof(double));
    values = (double *)malloc(n_appr_x * n_appr_y * sizeof(double));
-   state_2 = (double **)malloc(n_appr_x * n_appr_y * sizeof(double));
-   for (int i = 0; i < n_appr_x; i++)
-   {
-      for (int j = 0; j < n_appr_y; j++)
-      {
-         state_2[i * n_appr_y + j] = (double *)malloc(16 * sizeof(double));
-      }
-   }
-   derivatives_2 = (double *)malloc(2 * (n_appr_x + n_appr_y) * sizeof(double));
-   values_2 = (double *)malloc(n_appr_x * n_appr_y * sizeof(double));
 }
 
 void Scene3D::resizeGL(int nWidth, int nHeight)
@@ -621,7 +503,11 @@ void Scene3D::paintGL()
          z2 = f(x1, y2);
          z3 = f(x2, y1);
          z4 = f(x2, y2);
-         glBegin(GL_TRIANGLE_FAN);
+         if (max_buf < fabs(z1)) max_buf = fabs(z1);
+         if (max_buf < fabs(z2)) max_buf = fabs(z2);
+         if (max_buf < fabs(z3)) max_buf = fabs(z3);
+         if (max_buf < fabs(z4)) max_buf = fabs(z4);
+         glBegin(GL_LINE_LOOP);
          glColor4f(0, 0, 0, 70);
          glVertex3f(x1, y1, z1);
          glVertex3f(x1, y2, z2);
@@ -632,6 +518,7 @@ void Scene3D::paintGL()
       }
       x1 = x2, y1 = buf;
    }
+   max_buf = 0;
    if (show_graph_1 == 1)
    {
       if (initialized == 0)
@@ -650,38 +537,8 @@ void Scene3D::paintGL()
             z2 = Pf1(x1, y2, n_appr_x, n_appr_y);
             z3 = Pf1(x2, y1, n_appr_x, n_appr_y);
             z4 = Pf1(x2, y2, n_appr_x, n_appr_y);
-            glBegin(GL_TRIANGLE_FAN);
+            glBegin(GL_LINE_LOOP);
             glColor4f(0, 0, 50, 70);
-            glVertex3f(x1, y1, z1);
-            glVertex3f(x1, y2, z2);
-            glVertex3f(x2, y1, z3);
-            glVertex3f(x2, y2, z4);
-            glEnd();
-            y1 = y2;
-         }
-         x1 = x2, y1 = buf;
-      }
-   }
-   if (show_graph_2 == 1)
-   {
-      if (initialized_2 == 0)
-      {
-         Pf2_init(n_appr_x, a_x, b_x, n_appr_y, a_y, b_y);
-         initialized_2 = 1;
-      }
-      x1 = a_x;
-      y1 = a_y;
-      buf = y1;
-      for (x2 = x1 + delta_x; x2 - b_x < 1.e-6; x2 += delta_x)
-      {
-         for (y2 = y1 + delta_y; y2 - b_y < 1.e-6; y2 += delta_y)
-         {
-            z1 = Pf2(x1, y1, n_appr_x, n_appr_y);
-            z2 = Pf2(x1, y2, n_appr_x, n_appr_y);
-            z3 = Pf2(x2, y1, n_appr_x, n_appr_y);
-            z4 = Pf2(x2, y2, n_appr_x, n_appr_y);
-            glBegin(GL_TRIANGLE_FAN);
-            glColor4f(0, 50, 0, 70);
             glVertex3f(x1, y1, z1);
             glVertex3f(x1, y2, z2);
             glVertex3f(x2, y1, z3);
@@ -863,16 +720,6 @@ void Window::paintEvent(QPaintEvent *event)
          painter.drawText(0, 100, "Err1 = " + QString::number(scene->max_buf_1));
       }
    }
-   if (scene->show_graph_2 == 1 || scene->show_graph_err == 1)
-   {
-      painter.setPen("green");
-      painter.drawText(0, 140, "- method 2");
-      if (scene->show_graph_err == 1)
-      {
-         painter.drawText(0, 160, "Err2 = " + QString::number(scene->max_buf_2));
-      }
-   }
-
    painter.drawText(0, 200, "disturbance = " + QString::number(scene->disturb));
    update();
 }

@@ -11,7 +11,7 @@ double method_compute(int n_x, double a_x, double b_x, double x, int n_y, double
     {
         for (int j = 0; j < n_y; j++)
         {
-            if (x + 1.e-6 < a_x + (i + 1) * h_x && x + 1.e-6> a_x + i * h_x && y + 1.e-6 < a_y + (j + 1) * h_y && y + 1.e-6 > a_y + j * h_y)
+            if (x + 1.e-6 < a_x + (i + 1) * h_x && x + 1.e-6 > a_x + i * h_x && y + 1.e-6 < a_y + (j + 1) * h_y && y + 1.e-6 > a_y + j * h_y)
             {
                 buf_x = i;
                 buf_y = j;
@@ -27,7 +27,7 @@ double method_compute(int n_x, double a_x, double b_x, double x, int n_y, double
             res += state[buf_x * n_y + buf_y][i * 4 + j] * pow((x - (a_x + h_x * (double)buf_x)), i) * pow((y - (a_y + h_y * (double)buf_y)), j);
             // if (x < -9.5f && x > -10.5f && y < -9.5f && y > -10.5f) printf("i = %d, j = %d, state = %lf, res = %lf, pow1 = %lf = %lf - (%lf + %lf * %d), pow2 = %lf = %lf - (%lf + %lf * %d)\n", i, j, state[buf_x * n_y + buf_y][i * 4 + j], res, pow((x - (a_x + h_x * buf_x)), i), x, a_x, h_x, buf_x, pow(y - (a_y + h_y * buf_y), j), y, a_y, h_y, buf_y);
             // if (x < -9.5f && x > -10.5f && y < 10.5f && y > 9.5f) printf("i = %d, j = %d, state = %lf, res = %lf, pow1 = %lf = %lf - (%lf + %lf * %d), pow2 = %lf = %lf - (%lf + %lf * %d)\n", i, j, state[buf_x * n_y + buf_y][i * 4 + j], res, pow((x - (a_x + h_x * buf_x)), i), x, a_x, h_x, buf_x, pow(y - (a_y + h_y * buf_y), j), y, a_y, h_y, buf_y);
-            // if (x < 0.5f && x > -0.5f && y < 10.5f && y > 9.5f) printf("i = %d, j = %d, state = %lf, res = %lf, pow1 = %lf = %lf - (%lf + %lf * %d), pow2 = %lf = %lf - (%lf + %lf * %d)\n", i, j, state[buf_x * n_y + buf_y][i * 4 + j], res, pow((x - (a_x + h_x * buf_x)), i), x, a_x, h_x, buf_x, pow(y - (a_y + h_y * buf_y), j), y, a_y, h_y, buf_y);
+            if (x < 0.5f && x > -0.5f && y < 10.5f && y > 9.5f) printf("i = %d, j = %d, state = %lf, res = %lf, pow1 = %lf = %lf - (%lf + %lf * %d), pow2 = %lf = %lf - (%lf + %lf * %d)\n", i, j, state[buf_x * n_y + buf_y][i * 4 + j], res, pow((x - (a_x + h_x * buf_x)), i), x, a_x, h_x, buf_x, pow(y - (a_y + h_y * buf_y), j), y, a_y, h_y, buf_y);
 
         }
     }

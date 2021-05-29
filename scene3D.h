@@ -3,7 +3,6 @@
 
 #include <QGLWidget>
 #include "method1_init.h"
-#include "method2_init.h"
 #include "method_compute.h"
 
 class Scene3D : public QGLWidget
@@ -41,10 +40,6 @@ private:
    double *file_values;
    double *derivatives;
    double **state;
-   double *values_2;
-   double *file_values_2;
-   double *derivatives_2;
-   double **state_2;
    double scale_parameter;
 
 protected:
@@ -62,12 +57,8 @@ public:
    ~Scene3D();
    int parse_command_line(int argc, char *argv[]);
    double Pf1(double x, double y, int n_appr_x, int n_appr_y);
-   double Pf2(double x, double y, int n_appr_x, int n_appr_y);
    double Errf(double x, double y, int n_appr_x, int n_appr_y);
-   double Errf2(double x, double y, int n_appr_x, int n_appr_y);
    int Pf1_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y, double b_y);
-   int Pf2_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y, double b_y);
-
    const char *f_name;
    int n_appr_x;
    int n_appr_y;
@@ -76,12 +67,9 @@ public:
    double max_buf_1;
    double max_buf_2;
    int disturb;
-   bool working_with_file;
    bool show_graph_1;
-   bool show_graph_2;
    bool show_graph_err;
    bool initialized;
-   bool initialized_2;
 public slots:
    void change_func();
    void add_n_appr();
@@ -91,7 +79,6 @@ public slots:
    void reduce_n_appr_x();
    void reduce_n_appr_y();
    void show_method_1();
-   void show_method_2();
    void show_err();
    void scale_up();
    void scale_down();
