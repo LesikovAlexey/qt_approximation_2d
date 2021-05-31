@@ -88,14 +88,4 @@ public slots:
    void reduce_fineness();
 };
 
-class Window : public QWidget
-{
-   Q_OBJECT
-public:
-   Scene3D *scene;
-   Window(QWidget *parent){};
-
-protected:
-   void paintEvent(QPaintEvent *event);
-};
 #endif

@@ -490,6 +490,7 @@ void Scene3D::paintGL()
    glMatrixMode(GL_MODELVIEW);
    glLoadIdentity();
 
+  
    glScalef(nSca, nSca, nSca);
    glTranslatef(0.0f, zTra, 0.0f);
    glRotatef(xRot, 1.0f, 0.0f, 0.0f);
@@ -501,6 +502,7 @@ void Scene3D::paintGL()
    y1 = a_y;
    buf = y1;
    max_buf = 0;
+   max_buf_1 = 0;
    if (show_graph_err == 0)
    {
       for (x2 = x1 + delta_x; x2 - b_x < 1.e-6; x2 += delta_x)
@@ -544,6 +546,10 @@ void Scene3D::paintGL()
                z2 = Pf1(x1, y2, n_appr_x, n_appr_y);
                z3 = Pf1(x2, y1, n_appr_x, n_appr_y);
                z4 = Pf1(x2, y2, n_appr_x, n_appr_y);
+               if (max_buf_1 < fabs(z1 - f(x1, y1))) max_buf_1 = fabs(z1 - f(x1, y1));
+               if (max_buf_1 < fabs(z2 - f(x1, y2))) max_buf_1 = fabs(z2 - f(x1, y2));
+               if (max_buf_1 < fabs(z3 - f(x2, y1))) max_buf_1 = fabs(z3 - f(x2, y1));
+               if (max_buf_1 < fabs(z4 - f(x2, y2))) max_buf_1 = fabs(z4 - f(x2, y2));
                glBegin(GL_LINE_LOOP);
                glColor4f(0, 0, 50, 70);
                glVertex3f(x1, y1, z1);
@@ -590,7 +596,29 @@ void Scene3D::paintGL()
          }
          x1 = x2, y1 = buf;
       }
+      
+
+      
    }
+   glLoadIdentity();
+   QFont newFont("Courier", 25, QFont::Cursive);
+   QFont font("Courier", 16, QFont::Cursive);
+   glColor3f(0, 0, 0);
+   renderText (-1, 0.9, 0, f_name, font);
+   renderText (-1, 0.8, 0, "appr points on x = " + QString::number(n_appr_x) + " appr points on y = " + QString::number(n_appr_y), font);
+   renderText (-1, 0.7, 0, "draw points = " + QString::number(n), font);
+
+   if (show_graph_1 == 1 || show_graph_err == 1)
+   {
+      glColor3f(0, 0, 0.7f);
+      renderText (-1, 0.6, 0, "- method 1", font);
+      if (show_graph_err == 1)
+      {
+         renderText (-1, 0.5, 0, "Error = " + QString::number(max_buf_1), font);
+      }
+   }
+   glColor3f(0, 0, 0);
+   renderText (-1, 0.4, 0, "disturbance = " + QString::number(disturb), font);
 }
 
 void Scene3D::mousePressEvent(QMouseEvent *pe)
@@ -745,23 +773,3 @@ void Scene3D::drawAxis()
    glEnd();
 }
 
-void Window::paintEvent(QPaintEvent *event)
-{
-   QPainter painter(this);
-   painter.setPen("black");
-   painter.drawText(0, 20, scene->f_name);
-   painter.drawText(0, 40, "appr points on x = " + QString::number(scene->n_appr_x) + " appr points on y = " + QString::number(scene->n_appr_y));
-   painter.drawText(0, 60, "draw points = " + QString::number(scene->n));
-
-   if (scene->show_graph_1 == 1 || scene->show_graph_err == 1)
-   {
-      painter.setPen("blue");
-      painter.drawText(0, 80, "- method 1");
-      if (scene->show_graph_err == 1)
-      {
-         painter.drawText(0, 100, "Err1 = " + QString::number(scene->max_buf_1));
-      }
-   }
-   painter.drawText(0, 200, "disturbance = " + QString::number(scene->disturb));
-   update();
-}

@@ -17,8 +17,6 @@ int main(int argc, char **argv)
    Scene3D *scene1 = new Scene3D(window);
    QMenuBar *tool_bar = new QMenuBar(window);
    QAction *action;
-   Window *text_area = new Window(window);
-   text_area->scene = scene1;
    if (scene1->parse_command_line(argc, argv))
    {
       QMessageBox::warning(0, "Wrong input arguments!",
@@ -70,7 +68,6 @@ int main(int argc, char **argv)
 
    window->resize(1000, 1000);
    window->show();
-   text_area->show();
 
    return app.exec();
 }
