@@ -31,8 +31,8 @@ int method1_init_axis_x(int n_x, double a, double b, double *g)
     }
     for (int i = 1; i < n_x - 1; i++)
     {
-        g[i * n_x + i + 1] = 1 / (h);
-        g[i * n_x + i - 1] = -1 / (h);
+        g[i * n_x + i + 1] = 1 / (2*h);
+        g[i * n_x + i - 1] = -1 / (2*h);
     }
     return 0;
 }
@@ -50,8 +50,8 @@ int method1_init_axis_y(int n_y, double a, double b, double *g)
     }
     for (int i = 1; i < n_y - 1; i++)
     {
-        g[(i - 1) * n_y + i] = -1 / (h);
-        g[(i + 1) * n_y + i] = 1 / (h);
+        g[(i - 1) * n_y + i] = -1 / (2*h);
+        g[(i + 1) * n_y + i] = 1 / (2*h);
     }
     return 0;
 }
@@ -101,10 +101,10 @@ int method1_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y,
     Gamma_x[0] = 1;
     Gamma_x[5] = 1;
 
-    Gamma_x[8] = -1 / (h_x * h_x);
-    Gamma_x[9] = -1 / (h_x * h_x);
-    Gamma_x[10] = 1 / (h_x);
-    Gamma_x[11] = 0;
+    Gamma_x[8] = -3 / (h_x * h_x * h_x);
+    Gamma_x[9] = -2 / (h_x * h_x);
+    Gamma_x[10] = 3 / (h_x * h_x * h_x);
+    Gamma_x[11] = -1 / (h_x * h_x);
 
     Gamma_x[12] = 2 / (h_x * h_x * h_x);
     Gamma_x[13] = 1 / (h_x * h_x);
@@ -114,10 +114,10 @@ int method1_init(int n_appr_x, double a_x, double b_x, int n_appr_y, double a_y,
     Gamma_y[0] = 1;
     Gamma_y[5] = 1;
 
-    Gamma_y[2] = -1 / (h_y * h_y);
-    Gamma_y[6] = -1 / (h_y * h_y);
-    Gamma_y[10] = 1 / (h_y);
-    Gamma_y[14] = 0;
+    Gamma_y[2] = -3 / (h_x * h_x * h_x);
+    Gamma_y[6] = -2 / (h_x * h_x);
+    Gamma_y[10] = 3 / (h_x * h_x * h_x);
+    Gamma_y[14] = -1 / (h_x * h_x);
 
     Gamma_y[3] = 2 / (h_y * h_y * h_y);
     Gamma_y[7] = 1 / (h_y * h_y);

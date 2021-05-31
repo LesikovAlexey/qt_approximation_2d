@@ -38,7 +38,7 @@ int main(int argc, char **argv)
    action->setShortcut(QString("1"));
 
    action = tool_bar->addAction("&Show error graph", scene1, SLOT(show_err()));
-   action->setShortcut(QString("3"));
+   action->setShortcut(QString("2"));
 
    action = tool_bar->addAction("&Add disturbance", scene1, SLOT(add_disturb()));
    action->setShortcut(QString("Alt++"));

@@ -163,6 +163,11 @@ double Scene3D::Pf1(double x, double y, int n_appr_x, int n_appr_y)
    return method_compute(n_appr_x, a_x, b_x, x, n_appr_y, a_y, b_y, y, state);
 }
 
+double Scene3D::Errf(double x, double y, int n_appr_x, int n_appr_y)
+{
+  return fabs(Pf1(x, y, n_appr_x, n_appr_y) - f(x, y));
+}
+
 double Scene3D::f(double x, double y)
 {
 
@@ -495,31 +500,64 @@ void Scene3D::paintGL()
    x1 = a_x;
    y1 = a_y;
    buf = y1;
-   for (x2 = x1 + delta_x; x2 - b_x < 1.e-6; x2 += delta_x)
-   {
-      for (y2 = y1 + delta_y; y2 - b_y < 1.e-6; y2 += delta_y)
-      {
-         z1 = f(x1, y1);
-         z2 = f(x1, y2);
-         z3 = f(x2, y1);
-         z4 = f(x2, y2);
-         if (max_buf < fabs(z1)) max_buf = fabs(z1);
-         if (max_buf < fabs(z2)) max_buf = fabs(z2);
-         if (max_buf < fabs(z3)) max_buf = fabs(z3);
-         if (max_buf < fabs(z4)) max_buf = fabs(z4);
-         glBegin(GL_LINE_LOOP);
-         glColor4f(0, 0, 0, 70);
-         glVertex3f(x1, y1, z1);
-         glVertex3f(x1, y2, z2);
-         glVertex3f(x2, y1, z3);
-         glVertex3f(x2, y2, z4);
-         glEnd();
-         y1 = y2;
-      }
-      x1 = x2, y1 = buf;
-   }
    max_buf = 0;
-   if (show_graph_1 == 1)
+   if (show_graph_err == 0)
+   {
+      for (x2 = x1 + delta_x; x2 - b_x < 1.e-6; x2 += delta_x)
+      {
+         for (y2 = y1 + delta_y; y2 - b_y < 1.e-6; y2 += delta_y)
+         {
+            z1 = f(x1, y1);
+            z2 = f(x1, y2);
+            z3 = f(x2, y1);
+            z4 = f(x2, y2);
+            if (max_buf < fabs(z1)) max_buf = fabs(z1);
+            if (max_buf < fabs(z2)) max_buf = fabs(z2);
+            if (max_buf < fabs(z3)) max_buf = fabs(z3);
+            if (max_buf < fabs(z4)) max_buf = fabs(z4);
+            glBegin(GL_LINE_LOOP);
+            glColor4f(0, 0, 0, 70);
+            glVertex3f(x1, y1, z1);
+            glVertex3f(x1, y2, z2);
+            glVertex3f(x2, y1, z3);
+            glVertex3f(x2, y2, z4);
+            glEnd();
+            y1 = y2;
+         }
+         x1 = x2, y1 = buf;
+      }
+      if (show_graph_1 == 1)
+      {
+         if (initialized == 0)
+         {
+            Pf1_init(n_appr_x, a_x, b_x, n_appr_y, a_y, b_y);
+            initialized = 1;
+         }
+         x1 = a_x;
+         y1 = a_y;
+         buf = y1;
+         for (x2 = x1 + delta_x; x2 - b_x < 1.e-6; x2 += delta_x)
+         {
+            for (y2 = y1 + delta_y; y2 - b_y < 1.e-6; y2 += delta_y)
+            {
+               z1 = Pf1(x1, y1, n_appr_x, n_appr_y);
+               z2 = Pf1(x1, y2, n_appr_x, n_appr_y);
+               z3 = Pf1(x2, y1, n_appr_x, n_appr_y);
+               z4 = Pf1(x2, y2, n_appr_x, n_appr_y);
+               glBegin(GL_LINE_LOOP);
+               glColor4f(0, 0, 50, 70);
+               glVertex3f(x1, y1, z1);
+               glVertex3f(x1, y2, z2);
+               glVertex3f(x2, y1, z3);
+               glVertex3f(x2, y2, z4);
+               glEnd();
+               y1 = y2;
+            }
+            x1 = x2, y1 = buf;
+         }
+      }
+   }
+   if (show_graph_err == 1)
    {
       if (initialized == 0)
       {
@@ -533,10 +571,14 @@ void Scene3D::paintGL()
       {
          for (y2 = y1 + delta_y; y2 - b_y < 1.e-6; y2 += delta_y)
          {
-            z1 = Pf1(x1, y1, n_appr_x, n_appr_y);
-            z2 = Pf1(x1, y2, n_appr_x, n_appr_y);
-            z3 = Pf1(x2, y1, n_appr_x, n_appr_y);
-            z4 = Pf1(x2, y2, n_appr_x, n_appr_y);
+            z1 = Errf(x1, y1, n_appr_x, n_appr_y);
+            z2 = Errf(x1, y2, n_appr_x, n_appr_y);
+            z3 = Errf(x2, y1, n_appr_x, n_appr_y);
+            z4 = Errf(x2, y2, n_appr_x, n_appr_y);
+            if (max_buf_1 < fabs(z1)) max_buf_1 = fabs(z1);
+            if (max_buf_1 < fabs(z2)) max_buf_1 = fabs(z2);
+            if (max_buf_1 < fabs(z3)) max_buf_1 = fabs(z3);
+            if (max_buf_1 < fabs(z4)) max_buf_1 = fabs(z4);
             glBegin(GL_LINE_LOOP);
             glColor4f(0, 0, 50, 70);
             glVertex3f(x1, y1, z1);
